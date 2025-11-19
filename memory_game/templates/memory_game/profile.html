@@ -1,0 +1,340 @@
+{% extends 'memory_game/base_app.html' %}
+{% load static %}
+
+{% block title %}Memory Game | Mi Perfil{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header del Perfil -->
+            <div class="glass-card p-4 text-center mb-4">
+                <div class="user-avatar-large mb-3">
+                    <i class="fas fa-user-circle" style="color: #8b5cf6; font-size: 4rem;"></i>
+                </div>
+                <h1 class="text-white mb-2">{{ user.username }}</h1>
+                <p class="text-muted">Jugador desde {{ user.date_joined|date:"d M Y" }}</p>
+                
+                <!-- Ranking Global -->
+                {% if global_rank %}
+                <div class="mt-3">
+                    <span class="badge bg-warning text-dark fs-6">
+                        <i class="fas fa-trophy me-1"></i>
+                        Posición #{{ global_rank.rank_position }} en el Ranking Global
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Estadísticas Principales MEJORADAS -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-2">
+                    <div class="stats-card text-center p-3">
+                        <i class="fas fa-gamepad text-primary display-6 mb-2"></i>
+                        <h3 class="text-white">{{ profile.total_games }}</h3>
+                        <small class="text-muted">Partidas Totales</small>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stats-card text-center p-3">
+                        <i class="fas fa-trophy text-success display-6 mb-2"></i>
+                        <h3 class="text-white">{{ profile.games_won }}</h3>
+                        <small class="text-muted">Victorias</small>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stats-card text-center p-3">
+                        <i class="fas fa-times-circle text-danger display-6 mb-2"></i>
+                        <h3 class="text-white">{{ profile.games_lost }}</h3>
+                        <small class="text-muted">Derrotas</small>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stats-card text-center p-3">
+                        <i class="fas fa-percentage text-warning display-6 mb-2"></i>
+                        <h3 class="text-white">{{ profile.win_rate|floatformat:1 }}%</h3>
+                        <small class="text-muted">Win Rate</small>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stats-card text-center p-3">
+                        <i class="fas fa-crown text-info display-6 mb-2"></i>
+                        <h3 class="text-white">{{ profile.best_score }}</h3>
+                        <small class="text-muted">Mejor Score</small>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stats-card text-center p-3">
+                        <i class="fas fa-star text-purple display-6 mb-2"></i>
+                        <h3 class="text-white">{{ profile.total_score }}</h3>
+                        <small class="text-muted">Puntos Totales</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones Rápidas -->
+            <div class="glass-card p-4 mb-4">
+                <h4 class="text-white mb-3">
+                    <i class="fas fa-rocket me-2"></i>Acciones Rápidas
+                </h4>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <a href="{% url 'select_difficulty' %}" class="btn btn-success w-100 p-3">
+                            <i class="fas fa-play me-2"></i>
+                            <div>Nueva Partida</div>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'leaderboard' %}" class="btn btn-warning w-100 p-3">
+                            <i class="fas fa-trophy me-2"></i>
+                            <div>Ver Ranking</div>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'game_history' %}" class="btn btn-info w-100 p-3">
+                            <i class="fas fa-history me-2"></i>
+                            <div>Mi Historial</div>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'player_stats' %}" class="btn btn-primary w-100 p-3">
+                            <i class="fas fa-chart-line me-2"></i>
+                            <div>Estadísticas</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estadísticas Detalladas -->
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="glass-card p-4 h-100">
+                        <h4 class="text-white mb-4">
+                            <i class="fas fa-chart-bar me-2"></i>Rendimiento
+                        </h4>
+                        <div class="mb-3">
+                            <label class="text-muted">Tiempo Promedio</label>
+                            <h5 class="text-white">{{ profile.average_time|floatformat:1 }} segundos</h5>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted">Dificultad Favorita</label>
+                            <h5 class="text-white">
+                                <span class="badge 
+                                    {% if profile.favorite_difficulty == 'basic' %}bg-primary
+                                    {% elif profile.favorite_difficulty == 'medium' %}bg-warning
+                                    {% else %}bg-danger{% endif %}">
+                                    {{ profile.favorite_difficulty|title }}
+                                </span>
+                            </h5>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted">Puntuación Promedio</label>
+                            <h5 class="text-warning">{{ profile.average_score|floatformat:0 }} puntos</h5>
+                        </div>
+                        <div>
+                            <label class="text-muted">Progreso General</label>
+                            <div class="progress mt-2" style="height: 12px;">
+                                {% if profile.total_games > 0 %}
+                                    <div class="progress-bar bg-success" 
+                                         style="width: {{ profile.win_rate }}%"
+                                         title="Win Rate: {{ profile.win_rate|floatformat:1 }}%">
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="d-flex justify-content-between mt-1">
+                                <small class="text-muted">Victorias</small>
+                                <small class="text-muted">{{ profile.win_rate|floatformat:1 }}%</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="glass-card p-4 h-100">
+                        <h4 class="text-white mb-4">
+                            <i class="fas fa-history me-2"></i>Historial Reciente
+                        </h4>
+                        {% if recent_games %}
+                            {% for game in recent_games %}
+                            <div class="game-history-item mb-3 p-3" 
+                                 style="background: rgba(255,255,255,0.05); border-radius: 10px;">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <span class="text-white fw-bold">{{ game.difficulty|title }}</span>
+                                        <div class="text-muted small mt-1">
+                                            <span>{{ game.moves }} movimientos • {{ game.time_taken }}s</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge {% if game.won %}bg-success{% else %}bg-danger{% endif %} mb-2">
+                                            {{ game.start_time|date:"d/m H:i" }}
+                                        </span>
+                                        <div>
+                                            <span class="badge bg-warning text-dark">
+                                                {{ game.score }} pts
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% if game.perfect_game %}
+                                <div class="mt-2">
+                                    <span class="badge bg-gold">
+                                        <i class="fas fa-star me-1"></i>Juego Perfecto
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                            
+                            <!-- Ver más partidas -->
+                            <div class="text-center mt-3">
+                                <a href="{% url 'game_history' %}" class="btn btn-outline-light btn-sm">
+                                    <i class="fas fa-list me-1"></i>Ver todas las partidas
+                                </a>
+                            </div>
+                            
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-gamepad display-1 text-muted mb-3"></i>
+                                <p class="text-muted">Aún no hay partidas jugadas</p>
+                                <a href="{% url 'select_difficulty' %}" class="btn btn-primary-custom">
+                                    <i class="fas fa-play me-2"></i>Jugar Ahora
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logros Destacados -->
+            {% if profile.total_games > 0 %}
+            <div class="glass-card p-4 mt-4">
+                <h4 class="text-white mb-4">
+                    <i class="fas fa-award me-2"></i>Logros Destacados
+                </h4>
+                <div class="row g-3">
+                    {% if profile.best_score >= 1000 %}
+                    <div class="col-md-3">
+                        <div class="achievement-card text-center p-3">
+                            <i class="fas fa-crown text-warning display-6 mb-2"></i>
+                            <h6 class="text-white">Score Alto</h6>
+                            <small class="text-muted">+1000 puntos</small>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if profile.win_rate >= 50 %}
+                    <div class="col-md-3">
+                        <div class="achievement-card text-center p-3">
+                            <i class="fas fa-trophy text-success display-6 mb-2"></i>
+                            <h6 class="text-white">Win Rate 50%+</h6>
+                            <small class="text-muted">Consistente</small>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if profile.total_games >= 10 %}
+                    <div class="col-md-3">
+                        <div class="achievement-card text-center p-3">
+                            <i class="fas fa-gamepad text-primary display-6 mb-2"></i>
+                            <h6 class="text-white">Jugador Activo</h6>
+                            <small class="text-muted">10+ partidas</small>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if global_rank and global_rank.rank_position <= 10 %}
+                    <div class="col-md-3">
+                        <div class="achievement-card text-center p-3">
+                            <i class="fas fa-chess-queen text-danger display-6 mb-2"></i>
+                            <h6 class="text-white">Top 10 Global</h6>
+                            <small class="text-muted">Posición #{{ global_rank.rank_position }}</small>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% if profile.total_games > 0 and not profile.best_score >= 1000 and not profile.win_rate >= 50 and not profile.total_games >= 10 %}
+                <div class="text-center py-3">
+                    <p class="text-muted">Sigue jugando para desbloquear logros</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Botones de Navegación -->
+            <div class="text-center mt-4">
+                <a href="{% url 'select_difficulty' %}" class="btn btn-primary-custom me-2">
+                    <i class="fas fa-arrow-left me-2"></i>Volver al Menú
+                </a>
+                <a href="{% url 'leaderboard' %}" class="btn btn-warning me-2">
+                    <i class="fas fa-trophy me-2"></i>Ranking Global
+                </a>
+                <a href="{% url 'player_stats' %}" class="btn btn-info">
+                    <i class="fas fa-chart-line me-2"></i>Estadísticas Completas
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.glass-card {
+    background: rgba(30, 30, 60, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 16px;
+}
+
+.stats-card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 15px;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: transform 0.2s;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+}
+
+.achievement-card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: transform 0.2s;
+}
+
+.achievement-card:hover {
+    transform: translateY(-3px);
+    background: rgba(255,255,255,0.08);
+}
+
+.bg-gold {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #000;
+    border: none;
+}
+
+.game-history-item {
+    transition: transform 0.2s;
+}
+
+.game-history-item:hover {
+    transform: translateX(5px);
+    background: rgba(255,255,255,0.08) !important;
+}
+
+.progress {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.btn {
+    transition: transform 0.2s;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}

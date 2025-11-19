@@ -1,0 +1,576 @@
+{% extends 'memory_game/base_app.html' %}
+{% load static %}
+
+{% block title %}Memory Game | Juego{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ESTILOS CRÍTICOS TEMPORALES - EL CSS NO SE ESTÁ CARGANDO */
+.memory-board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.memory-card {
+    aspect-ratio: 3/4;
+    perspective: 1000px;
+    cursor: pointer;
+    height: 120px;
+}
+
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+}
+
+.memory-card.flipped .card-inner {
+    transform: rotateY(180deg);
+}
+
+.card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    border: 2px solid rgba(139, 92, 246, 0.3);
+}
+
+.card-front {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+}
+
+.card-back {
+    background: white;
+    color: #333;
+    transform: rotateY(180deg);
+}
+
+.memory-card.matched .card-back {
+    background: #06d6a0;
+    color: white;
+}
+
+.game-board-container {
+    background: rgba(30, 30, 60, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.preview-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 20px 40px;
+    border-radius: 10px;
+    font-size: 1.5rem;
+    z-index: 100;
+    text-align: center;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Panel de Juego -->
+<div class="container my-4">
+    <div class="row">
+        <!-- Información del Juego -->
+        <div class="col-md-3">
+            <div class="glass-card p-3 mb-3">
+                <h5 class="text-white">Nivel: <span id="current-difficulty">{{ difficulty|title }}</span></h5>
+                <div class="mt-3">
+                    <p class="text-muted mb-1">Intentos:</p>
+                    <h4 class="text-warning" id="attempts-counter">6</h4>
+                </div>
+                <div class="mt-3">
+                    <p class="text-muted mb-1">Tiempo:</p>
+                    <h4 class="text-info" id="timer">60s</h4>
+                </div>
+                <div class="mt-3">
+                    <p class="text-muted mb-1">Pares Encontrados:</p>
+                    <h4 class="text-success" id="pairs-found">0/8</h4>
+                </div>
+                <!-- Control de Volumen -->
+                <div class="mt-3">
+                    <p class="text-muted mb-1">Volumen Música:</p>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-volume-up text-info me-2"></i>
+                        <input type="range" class="form-range" id="volume-control" 
+                               min="0" max="100" value="30" style="width: 100%;">
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-danger w-100 mb-3" onclick="resetGame()">
+                <i class="fas fa-redo me-2"></i>Reiniciar
+            </button>
+            <a href="{% url 'select_difficulty' %}" class="btn btn-secondary w-100">
+                <i class="fas fa-arrow-left me-2"></i>Salir
+            </a>
+        </div>
+
+        <!-- Tablero de Juego -->
+        <div class="col-md-9">
+            <div class="text-center mb-4">
+                <h2 class="text-white">Memory Game</h2>
+                <p class="text-muted">Encuentra todos los pares antes de que se acabe el tiempo</p>
+            </div>
+            
+            <div class="game-board-container" style="position: relative;">
+                <!-- Mensaje de Preview -->
+                <div id="preview-message" class="preview-message">
+                    <i class="fas fa-eye me-2"></i>Memoriza las cartas...
+                </div>
+                
+                <div id="game-board" class="memory-board">
+                    <!-- Las cartas se generarán con JavaScript -->
+                </div>
+            </div>
+
+            <!-- Mensajes del Juego -->
+            <div id="game-message" class="alert alert-info text-center mt-4" style="display: none;">
+                <i class="fas fa-info-circle me-2"></i>
+                <span id="message-text">¡Encuentra los pares!</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sistema de Sonidos -->
+<audio id="flip-sound" preload="auto">
+    <source src="{% static 'memory_game/sounds/flip.mp3' %}" type="audio/mpeg">
+</audio>
+<audio id="win-sound" preload="auto">
+    <source src="{% static 'memory_game/sounds/win.mp3' %}" type="audio/mpeg">
+</audio>
+<audio id="lose-sound" preload="auto">
+    <source src="{% static 'memory_game/sounds/lose.mp3' %}" type="audio/mpeg">
+</audio>
+
+<!-- Música de Fondo por Nivel -->
+<audio id="background-music-basic" preload="auto" loop>
+    <source src="{% static 'memory_game/sounds/music-basic.mp3' %}" type="audio/mpeg">
+</audio>
+<audio id="background-music-medium" preload="auto" loop>
+    <source src="{% static 'memory_game/sounds/music-medium.mp3' %}" type="audio/mpeg">
+</audio>
+<audio id="background-music-advanced" preload="auto" loop>
+    <source src="{% static 'memory_game/sounds/music-advanced.mp3' %}" type="audio/mpeg">
+</audio>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Configuración según dificultad
+    const DIFFICULTY_CONFIG = {
+        'basic': { attempts: 6, time: 90 },
+        'medium': { attempts: 4, time: 60 },
+        'advanced': { attempts: 2, time: 45 }
+    };
+
+    const config = DIFFICULTY_CONFIG['{{ difficulty }}'];
+    let gameState = {
+        attempts: config.attempts,
+        timeLeft: config.time,
+        pairsFound: 0,
+        totalPairs: 8,
+        flippedCards: [],
+        canFlip: false, // INICIA EN FALSE - no se puede jugar durante preview
+        timer: null,
+        attemptsUsed: 0,
+        currentMusic: null
+    };
+
+    // Símbolos para las cartas (8 pares)
+    const symbols = ['🍎', '🍌', '🍒', '🍇', '🍊', '🍋', '🍉', '🍓', '🍎', '🍌', '🍒', '🍇', '🍊', '🍋', '🍉', '🍓'];
+
+    // Sistema de Sonidos
+    function playSound(soundId) {
+        try {
+            const sound = document.getElementById(soundId);
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(e => console.log('Error reproduciendo sonido:', e));
+            }
+        } catch (error) {
+            console.log('Error en sistema de sonido:', error);
+        }
+    }
+
+    // Sistema de Música de Fondo por Nivel
+    function startBackgroundMusic() {
+        try {
+            const difficulty = '{{ difficulty }}';
+            let musicId;
+            
+            // Seleccionar música según dificultad
+            if (difficulty === 'basic') {
+                musicId = 'background-music-basic';
+            } else if (difficulty === 'medium') {
+                musicId = 'background-music-medium';
+            } else if (difficulty === 'advanced') {
+                musicId = 'background-music-advanced';
+            }
+            
+            const music = document.getElementById(musicId);
+            if (music) {
+                gameState.currentMusic = music;
+                
+                // Configurar música
+                const volumeControl = document.getElementById('volume-control');
+                const volume = volumeControl ? volumeControl.value / 100 : 0.3;
+                music.volume = volume;
+                music.loop = true;
+                
+                // Intentar reproducir (puede requerir interacción del usuario)
+                const playPromise = music.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.log('Reproducción automática bloqueada:', error);
+                        showMusicActivationButton(musicId);
+                    });
+                } else {
+                    console.log('Música de fondo iniciada para nivel:', difficulty);
+                }
+            }
+        } catch (error) {
+            console.log('Error en música de fondo:', error);
+        }
+    }
+
+    function showMusicActivationButton(musicId) {
+        // Remover botón anterior si existe
+        const existingButton = document.getElementById('music-activation-btn');
+        if (existingButton) {
+            existingButton.remove();
+        }
+        
+        // Crear botón de activación
+        const musicButton = document.createElement('button');
+        musicButton.id = 'music-activation-btn';
+        musicButton.innerHTML = '<i class="fas fa-volume-mute me-2"></i>Activar Música';
+        musicButton.className = 'btn btn-primary btn-sm music-btn';
+        
+        musicButton.onclick = function() {
+            const music = document.getElementById(musicId);
+            if (music) {
+                music.play().then(() => {
+                    musicButton.innerHTML = '<i class="fas fa-volume-up me-2"></i>Música Activada';
+                    musicButton.className = 'btn btn-success btn-sm music-btn';
+                    
+                    // Ocultar botón después de 2 segundos
+                    setTimeout(() => {
+                        musicButton.style.opacity = '0';
+                        setTimeout(() => {
+                            if (musicButton.parentNode) {
+                                musicButton.remove();
+                            }
+                        }, 500);
+                    }, 2000);
+                }).catch(e => {
+                    console.log('Error activando música:', e);
+                });
+            }
+        };
+        
+        document.body.appendChild(musicButton);
+    }
+
+    function stopBackgroundMusic() {
+        if (gameState.currentMusic) {
+            gameState.currentMusic.pause();
+            gameState.currentMusic.currentTime = 0;
+            gameState.currentMusic = null;
+        }
+        
+        // Parar todas las músicas posibles por si acaso
+        const musicIds = [
+            'background-music-basic',
+            'background-music-medium', 
+            'background-music-advanced'
+        ];
+        
+        musicIds.forEach(musicId => {
+            const music = document.getElementById(musicId);
+            if (music) {
+                music.pause();
+                music.currentTime = 0;
+            }
+        });
+        
+        // Remover botón de activación si existe
+        const musicButton = document.getElementById('music-activation-btn');
+        if (musicButton) {
+            musicButton.remove();
+        }
+    }
+
+    function updateMusicVolume() {
+        const volumeControl = document.getElementById('volume-control');
+        if (volumeControl && gameState.currentMusic) {
+            const volume = volumeControl.value / 100;
+            gameState.currentMusic.volume = volume;
+        }
+    }
+
+    // Inicializar juego cuando la página cargue
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeGame();
+        
+        // Configurar control de volumen
+        const volumeControl = document.getElementById('volume-control');
+        if (volumeControl) {
+            volumeControl.addEventListener('input', updateMusicVolume);
+        }
+    });
+
+    function initializeGame() {
+        const board = document.getElementById('game-board');
+        board.innerHTML = '';
+        
+        // Mostrar mensaje de preview
+        const previewMessage = document.getElementById('preview-message');
+        previewMessage.style.display = 'block';
+        
+        // Mezclar símbolos
+        const shuffledSymbols = [...symbols].sort(() => Math.random() - 0.5);
+        
+        // Crear cartas - INICIAN VISIBLES (volteadas)
+        shuffledSymbols.forEach((symbol, index) => {
+            const card = document.createElement('div');
+            card.className = 'memory-card flipped'; // INICIAN VOLTEADAS
+            card.innerHTML = `
+                <div class="card-inner">
+                    <div class="card-front">?</div>
+                    <div class="card-back">${symbol}</div>
+                </div>
+            `;
+            card.addEventListener('click', () => flipCard(card, symbol));
+            board.appendChild(card);
+        });
+
+        // Iniciar música de fondo según dificultad
+        startBackgroundMusic();
+        
+        updateUI();
+
+        // MOSTRAR CARTAS POR 3 SEGUNDOS Y LUEGO OCULTAR
+        setTimeout(() => {
+            const allCards = document.querySelectorAll('.memory-card');
+            allCards.forEach(card => {
+                card.classList.remove('flipped'); // OCULTAR CARTAS
+            });
+            
+            // Ocultar mensaje de preview
+            previewMessage.style.display = 'none';
+            
+            // Permitir jugar después del preview
+            gameState.canFlip = true;
+            
+            // Iniciar temporizador después del preview
+            startTimer();
+            
+            showMessage('¡Empieza a jugar! Encuentra los pares', 'info');
+            
+        }, 3000); // 3 segundos de preview
+    }
+
+    function flipCard(card, symbol) {
+        // Prevenir clicks durante el preview inicial y otras validaciones
+        if (!gameState.canFlip || card.classList.contains('flipped') || gameState.flippedCards.length >= 2) {
+            return;
+        }
+
+        card.classList.add('flipped');
+        gameState.flippedCards.push({ card, symbol });
+        
+        // Sonido al voltear carta
+        playSound('flip-sound');
+
+        if (gameState.flippedCards.length === 2) {
+            gameState.canFlip = false;
+            checkMatch();
+        }
+    }
+
+    function checkMatch() {
+        const [card1, card2] = gameState.flippedCards;
+        
+        if (card1.symbol === card2.symbol) {
+            // Par encontrado
+            card1.card.classList.add('matched');
+            card2.card.classList.add('matched');
+            gameState.pairsFound++;
+            
+            if (gameState.pairsFound === gameState.totalPairs) {
+                endGame(true);
+            } else {
+                showMessage('¡Bien! Encontraste un par', 'success');
+            }
+            
+            resetFlippedCards();
+        } else {
+            // No coinciden
+            gameState.attempts--;
+            gameState.attemptsUsed++;
+            showMessage('¡Ups! No coinciden', 'danger');
+            
+            setTimeout(() => {
+                card1.card.classList.remove('flipped');
+                card2.card.classList.remove('flipped');
+                resetFlippedCards();
+                
+                if (gameState.attempts <= 0) {
+                    endGame(false);
+                }
+            }, 1000);
+        }
+        
+        updateUI();
+    }
+
+    function resetFlippedCards() {
+        gameState.flippedCards = [];
+        gameState.canFlip = true;
+    }
+
+    function startTimer() {
+        gameState.timer = setInterval(() => {
+            gameState.timeLeft--;
+            updateUI();
+            
+            if (gameState.timeLeft <= 0) {
+                endGame(false);
+            }
+        }, 1000);
+    }
+
+    function updateUI() {
+        document.getElementById('attempts-counter').textContent = gameState.attempts;
+        document.getElementById('timer').textContent = `${gameState.timeLeft}s`;
+        document.getElementById('pairs-found').textContent = `${gameState.pairsFound}/${gameState.totalPairs}`;
+    }
+
+    function showMessage(text, type) {
+        const message = document.getElementById('game-message');
+        const messageText = document.getElementById('message-text');
+        
+        message.className = `alert alert-${type} text-center mt-4`;
+        messageText.textContent = text;
+        message.style.display = 'block';
+        
+        setTimeout(() => {
+            message.style.display = 'none';
+        }, 2000);
+    }
+
+    function endGame(isWin) {
+        clearInterval(gameState.timer);
+        gameState.canFlip = false;
+        
+        // Reproducir sonido de victoria o derrota
+        if (isWin) {
+            playSound('win-sound');
+            showMessage('¡Felicidades! Ganaste el juego', 'success');
+        } else {
+            playSound('lose-sound');
+            showMessage('¡Game Over! Se acabó el tiempo/intentos', 'danger');
+        }
+        
+        // Parar música al final del juego después de 3 segundos
+        setTimeout(() => {
+            stopBackgroundMusic();
+        }, 3000);
+        
+        // Guardar en base de datos
+        const attemptsUsed = gameState.attemptsUsed;
+        
+        console.log(`Fin del juego: ${isWin ? 'GANADO' : 'PERDIDO'}`);
+        console.log(`Tiempo usado: ${config.time - gameState.timeLeft}s`);
+        console.log(`Intentos usados: ${attemptsUsed}`);
+        
+        const gameData = {
+            difficulty: '{{ difficulty }}',
+            won: isWin,
+            time_taken: config.time - gameState.timeLeft,
+            moves: attemptsUsed
+        };
+        
+        fetch("{% url 'save_game_result' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(gameData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('✅ Partida guardada correctamente');
+            } else {
+                console.error('❌ Error guardando partida:', data.error);
+            }
+        });
+    }
+
+    function resetGame() {
+        clearInterval(gameState.timer);
+        stopBackgroundMusic(); // Parar música actual
+        
+        gameState = {
+            attempts: config.attempts,
+            timeLeft: config.time,
+            pairsFound: 0,
+            totalPairs: 8,
+            flippedCards: [],
+            canFlip: false, // Reset a false para preview
+            timer: null,
+            attemptsUsed: 0,
+            currentMusic: null
+        };
+        
+        initializeGame(); // Esto reiniciará la música y el preview
+        showMessage('¡Juego reiniciado!', 'info');
+    }
+
+    // Función para obtener el token CSRF
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

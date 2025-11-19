@@ -1,0 +1,35 @@
+<!-- memory_game/templates/memory_game/partials/navbar.html -->
+<nav class="navbar navbar-expand-lg navbar-custom">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'select_difficulty' %}">
+            <i class="fas fa-brain me-2" style="color: #8b5cf6;"></i>
+            <span class="text-white fw-bold">MemoryGame</span>
+        </a>
+        <div class="navbar-nav ms-auto">
+            <div class="nav-item dropdown user-dropdown">
+                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" 
+                   data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user-circle me-2" style="color: #8b5cf6;"></i>
+                    <span class="text-white">{{ user.username }}</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="{% url 'select_difficulty' %}">
+                        <i class="fas fa-home me-2"></i>Menú Principal
+                    </a></li>
+                    <li><a class="dropdown-item" href="{% url 'profile' %}">
+                        <i class="fas fa-chart-bar me-2"></i>Mi Perfil
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form method="post" action="{% url 'logout' %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="dropdown-item text-danger">
+                                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>

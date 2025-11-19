@@ -1,0 +1,321 @@
+{% extends 'memory_game/base_app.html' %}
+{% load static %}
+
+{% block title %}Memory Game | Mi Historial{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-12">
+            <!-- Header Principal -->
+            <div class="glass-card p-4 text-center mb-4">
+                <h1 class="text-white mb-3">
+                    <i class="fas fa-history me-2" style="color: #8b5cf6;"></i>
+                    Mi Historial de Partidas
+                </h1>
+                <p class="text-muted">Todas tus partidas jugadas - Total: {{ games.count }}</p>
+            </div>
+
+            <!-- Estadísticas Rápidas -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="stats-card text-center p-3">
+                        <i class="fas fa-list-alt text-primary display-6 mb-2"></i>
+                        <h4 class="text-white">{{ games.count }}</h4>
+                        <small class="text-muted">Total Partidas</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card text-center p-3">
+                        <i class="fas fa-trophy text-success display-6 mb-2"></i>
+                        <h4 class="text-white">{{ games_won_count }}</h4>
+                        <small class="text-muted">Victorias</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card text-center p-3">
+                        <i class="fas fa-crown text-warning display-6 mb-2"></i>
+                        <h4 class="text-white">{{ best_score }}</h4>
+                        <small class="text-muted">Mejor Puntuación</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card text-center p-3">
+                        <i class="fas fa-clock text-info display-6 mb-2"></i>
+                        <h4 class="text-white">{{ avg_time|floatformat:1 }}s</h4>
+                        <small class="text-muted">Tiempo Promedio</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros y Controles -->
+            <div class="glass-card p-4 mb-4">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h4 class="text-white mb-0">
+                            <i class="fas fa-table me-2"></i>
+                            Historial Completo
+                        </h4>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <div class="btn-group" role="group">
+                            <a href="?filter=all" class="btn btn-outline-light {% if request.GET.filter == 'all' or not request.GET.filter %}active{% endif %}">
+                                Todas ({{ games.count }})
+                            </a>
+                            <a href="?filter=won" class="btn btn-outline-success {% if request.GET.filter == 'won' %}active{% endif %}">
+                                Victorias ({{ games_won_count }})
+                            </a>
+                            <a href="?filter=lost" class="btn btn-outline-danger {% if request.GET.filter == 'lost' %}active{% endif %}">
+                                Derrotas ({{ games_lost_count }})
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Partidas -->
+            <div class="glass-card p-4">
+                {% if games %}
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover">
+                        <thead>
+                            <tr>
+                                <th width="120">Resultado</th>
+                                <th width="100">Puntuación</th>
+                                <th width="120">Dificultad</th>
+                                <th width="100">Tiempo</th>
+                                <th width="120">Movimientos</th>
+                                <th width="150">Fecha</th>
+                                <th>Detalles</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for game in games %}
+                            <tr>
+                                <td>
+                                    {% if game.won %}
+                                    <span class="badge bg-success p-2">
+                                        <i class="fas fa-trophy me-1"></i>Victoria
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-danger p-2">
+                                        <i class="fas fa-times me-1"></i>Derrota
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="fw-bold {% if game.won %}text-warning{% else %}text-muted{% endif %} fs-5">
+                                        {{ game.score }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge 
+                                        {% if game.difficulty == 'basic' %}bg-primary
+                                        {% elif game.difficulty == 'medium' %}bg-warning text-dark
+                                        {% else %}bg-danger{% endif %} p-2">
+                                        <i class="fas 
+                                            {% if game.difficulty == 'basic' %}fa-chess-pawn
+                                            {% elif game.difficulty == 'medium' %}fa-chess-knight
+                                            {% else %}fa-chess-queen{% endif %} me-1">
+                                        </i>
+                                        {{ game.difficulty|title }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-clock text-muted me-2"></i>
+                                        <span class="text-muted">{{ game.time_taken }}s</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-shoe-prints text-muted me-2"></i>
+                                        <span class="text-muted">{{ game.moves }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="text-muted">
+                                        <small>
+                                            <i class="fas fa-calendar me-1"></i>
+                                            {{ game.start_time|date:"d/m/Y" }}<br>
+                                            <i class="fas fa-clock me-1"></i>
+                                            {{ game.start_time|date:"H:i" }}
+                                        </small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        {% if game.perfect_game %}
+                                        <span class="badge bg-gold" title="Juego Perfecto">
+                                            <i class="fas fa-star me-1"></i>Perfecto
+                                        </span>
+                                        {% endif %}
+                                        
+                                        {% if game.score == best_score %}
+                                        <span class="badge bg-primary" title="Tu mejor puntuación">
+                                            <i class="fas fa-crown me-1"></i>Récord
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-gamepad display-1 text-muted mb-3"></i>
+                    <h4 class="text-muted">Aún no has jugado partidas</h4>
+                    <p class="text-muted">¡Comienza a jugar para ver tu historial aquí!</p>
+                    <a href="{% url 'select_difficulty' %}" class="btn btn-primary-custom mt-3">
+                        <i class="fas fa-play me-2"></i>Jugar Ahora
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Resumen de Estadísticas SIMPLIFICADO -->
+            <div class="row g-4 mt-4">
+                <div class="col-md-6">
+                    <div class="glass-card p-4">
+                        <h5 class="text-white mb-3">
+                            <i class="fas fa-chart-pie me-2 text-info"></i>
+                            Distribución por Dificultad
+                        </h5>
+                        
+                        <!-- Básico -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-white">
+                                    <i class="fas fa-chess-pawn text-primary me-2"></i>Básico
+                                </span>
+                                <span class="text-muted">
+                                    {{ basic_count }} partidas ({{ basic_percent|floatformat:1 }}%)
+                                </span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-primary" style="width: {{ basic_percent }}%"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Medio -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-white">
+                                    <i class="fas fa-chess-knight text-warning me-2"></i>Medio
+                                </span>
+                                <span class="text-muted">
+                                    {{ medium_count }} partidas ({{ medium_percent|floatformat:1 }}%)
+                                </span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-warning" style="width: {{ medium_percent }}%"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Avanzado -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-white">
+                                    <i class="fas fa-chess-queen text-danger me-2"></i>Avanzado
+                                </span>
+                                <span class="text-muted">
+                                    {{ advanced_count }} partidas ({{ advanced_percent|floatformat:1 }}%)
+                                </span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-danger" style="width: {{ advanced_percent }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="glass-card p-4">
+                        <h5 class="text-white mb-3">
+                            <i class="fas fa-trend-up me-2 text-success"></i>
+                            Tu Progreso
+                        </h5>
+                        <div class="mb-3">
+                            <small class="text-muted">Win Rate General</small>
+                            <div class="d-flex align-items-center">
+                                <div class="progress flex-grow-1 me-3" style="height: 10px;">
+                                    <div class="progress-bar bg-success" style="width: {{ win_rate }}%"></div>
+                                </div>
+                                <span class="text-white fw-bold">{{ win_rate|floatformat:1 }}%</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted">Mejor Puntuación</small>
+                            <h4 class="text-warning">{{ best_score }} pts</h4>
+                        </div>
+                        <div>
+                            <small class="text-muted">Tiempo Promedio</small>
+                            <h5 class="text-info">{{ avg_time|floatformat:1 }} segundos</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de Navegación -->
+            <div class="text-center mt-4">
+                <a href="{% url 'profile' %}" class="btn btn-primary-custom me-2">
+                    <i class="fas fa-user me-2"></i>Mi Perfil
+                </a>
+                <a href="{% url 'leaderboard' %}" class="btn btn-warning me-2">
+                    <i class="fas fa-trophy me-2"></i>Ranking Global
+                </a>
+                <a href="{% url 'player_stats' %}" class="btn btn-info me-2">
+                    <i class="fas fa-chart-line me-2"></i>Estadísticas
+                </a>
+                <a href="{% url 'select_difficulty' %}" class="btn btn-success">
+                    <i class="fas fa-play me-2"></i>Nueva Partida
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.glass-card {
+    background: rgba(30, 30, 60, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 16px;
+}
+
+.bg-gold {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #000;
+    border: none;
+}
+
+.stats-card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 15px;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: transform 0.2s;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+}
+
+.btn-outline-light.active {
+    background-color: rgba(255,255,255,0.1);
+    border-color: #8b5cf6;
+    color: #8b5cf6;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.progress {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends 'memory_game/base_app.html' %}
+{% load static %}
+
+{% block title %}Memory Game | Seleccionar Dificultad{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Sección de Bienvenida -->
+    <div class="welcome-section">
+        <div class="game-icon">
+            <i class="fas fa-chess-board"></i>
+        </div>
+        <h1 class="display-5 fw-bold text-white mb-3">Elige tu Desafío</h1>
+        <p class="lead text-muted">Selecciona el nivel de dificultad y pon a prueba tu memoria</p>
+    </div>
+
+    <!-- Tarjetas de Dificultad -->
+    <div class="row g-4">
+        <!-- Básico -->
+        <div class="col-lg-4 col-md-6">
+            <div class="game-card p-4 h-100 text-center">
+                <span class="difficulty-badge text-success">FÁCIL</span>
+                <div class="mb-4">
+                    <i class="fas fa-seedling text-success display-4"></i>
+                </div>
+                <h3 class="text-white mb-3">Básico</h3>
+                <p class="text-muted mb-4">
+                    Perfecto para comenzar tu aventura en el mundo de la memoria
+                </p>
+                
+                <ul class="feature-list text-start text-muted mb-4">
+                    <li><i class="fas fa-redo text-success me-2"></i><strong>6 intentos</strong> disponibles</li>
+                    <li><i class="fas fa-clock text-success me-2"></i><strong>90 segundos</strong> de tiempo</li>
+                    <li><i class="fas fa-heart text-success me-2"></i>Ritmo relajado</li>
+                    <li><i class="fas fa-star text-success me-2"></i>Ideal para principiantes</li>
+                </ul>
+                
+                <a href="{% url 'game' 'basic' %}" class="btn btn-basic w-100 py-3">
+                    <i class="fas fa-play-circle me-2"></i>Jugar Básico
+                </a>
+            </div>
+        </div>
+
+        <!-- Medio -->
+        <div class="col-lg-4 col-md-6">
+            <div class="game-card p-4 h-100 text-center">
+                <span class="difficulty-badge text-warning">MEDIO</span>
+                <div class="mb-4">
+                    <i class="fas fa-rocket text-warning display-4"></i>
+                </div>
+                <h3 class="text-white mb-3">Intermedio</h3>
+                <p class="text-muted mb-4">
+                    Un desafío equilibrado para jugadores con experiencia
+                </p>
+                
+                <ul class="feature-list text-start text-muted mb-4">
+                    <li><i class="fas fa-redo text-warning me-2"></i><strong>4 intentos</strong> disponibles</li>
+                    <li><i class="fas fa-clock text-warning me-2"></i><strong>60 segundos</strong> de tiempo</li>
+                    <li><i class="fas fa-bolt text-warning me-2"></i>Ritmo moderado</li>
+                    <li><i class="fas fa-fire text-warning me-2"></i>Para jugadores casuales</li>
+                </ul>
+                
+                <a href="{% url 'game' 'medium' %}" class="btn btn-medium w-100 py-3">
+                    <i class="fas fa-play-circle me-2"></i>Jugar Intermedio
+                </a>
+            </div>
+        </div>
+
+        <!-- Avanzado -->
+        <div class="col-lg-4 col-md-6">
+            <div class="game-card p-4 h-100 text-center">
+                <span class="difficulty-badge text-danger">AVANZADO</span>
+                <div class="mb-4">
+                    <i class="fas fa-crown text-danger display-4"></i>
+                </div>
+                <h3 class="text-white mb-3">Experto</h3>
+                <p class="text-muted mb-4">
+                    Solo para los más valientes. ¿Tienes lo que se necesita?
+                </p>
+                
+                <ul class="feature-list text-start text-muted mb-4">
+                    <li><i class="fas fa-redo text-danger me-2"></i><strong>2 intentos</strong> disponibles</li>
+                    <li><i class="fas fa-clock text-danger me-2"></i><strong>45 segundos</strong> de tiempo</li>
+                    <li><i class="fas fa-skull text-danger me-2"></i>Ritmo intenso</li>
+                    <li><i class="fas fa-trophy text-danger me-2"></i>Para maestros de la memoria</li>
+                </ul>
+                
+                <a href="{% url 'game' 'advanced' %}" class="btn btn-advanced w-100 py-3">
+                    <i class="fas fa-play-circle me-2"></i>Jugar Experto
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Rápidas -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="stats-card text-center">
+                <h4 class="text-white mb-4"><i class="fas fa-chart-line me-2"></i>Tus Estadísticas</h4>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="text-primary">
+                            <i class="fas fa-gamepad display-6"></i>
+                            <h5 class="mt-2" id="total-games">{{ profile.total_games }}</h5>
+                            <small class="text-muted">Partidas Jugadas</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-success">
+                            <i class="fas fa-trophy display-6"></i>
+                            <h5 class="mt-2" id="games-won">{{ profile.games_won }}</h5>
+                            <small class="text-muted">Victorias</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-warning">
+                            <i class="fas fa-clock display-6"></i>
+                            <h5 class="mt-2" id="avg-time">{{ profile.average_time|floatformat:0 }}s</h5>
+                            <small class="text-muted">Tiempo Promedio</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-info">
+                            <i class="fas fa-star display-6"></i>
+                            <h5 class="mt-2" id="win-rate">{{ profile.win_rate|floatformat:1 }}%</h5>
+                            <small class="text-muted">Tasa de Éxito</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

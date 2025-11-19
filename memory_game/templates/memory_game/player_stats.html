@@ -1,0 +1,531 @@
+{% extends 'memory_game/base_app.html' %}
+{% load static %}
+
+{% block title %}Memory Game | Mis Estadísticas{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-12">
+            <!-- Header Principal -->
+            <div class="glass-card p-4 text-center mb-4">
+                <h1 class="text-white mb-3">
+                    <i class="fas fa-chart-line me-2" style="color: #06d6a0;"></i>
+                    Mis Estadísticas Detalladas
+                </h1>
+                <p class="text-muted">Análisis completo de tu desempeño en Memory Game</p>
+            </div>
+
+            <!-- Estadísticas Principales -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-2">
+                    <div class="stats-card text-center p-3">
+                        <i class="fas fa-gamepad text-primary display-6 mb-2"></i>
+                        <h4 class="text-white">{{ profile.total_games }}</h4>
+                        <small class="text-muted">Partidas Totales</small>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stats-card text-center p-3">
+                        <i class="fas fa-trophy text-success display-6 mb-2"></i>
+                        <h4 class="text-white">{{ profile.games_won }}</h4>
+                        <small class="text-muted">Victorias</small>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stats-card text-center p-3">
+                        <i class="fas fa-times-circle text-danger display-6 mb-2"></i>
+                        <h4 class="text-white">{{ profile.games_lost }}</h4>
+                        <small class="text-muted">Derrotas</small>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stats-card text-center p-3">
+                        <i class="fas fa-percentage text-warning display-6 mb-2"></i>
+                        <h4 class="text-white">{{ profile.win_rate|floatformat:1 }}%</h4>
+                        <small class="text-muted">Win Rate</small>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stats-card text-center p-3">
+                        <i class="fas fa-crown text-info display-6 mb-2"></i>
+                        <h4 class="text-white">{{ profile.best_score }}</h4>
+                        <small class="text-muted">Mejor Score</small>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stats-card text-center p-3">
+                        <i class="fas fa-star text-purple display-6 mb-2"></i>
+                        <h4 class="text-white">{{ profile.total_score }}</h4>
+                        <small class="text-muted">Puntos Totales</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estadísticas por Dificultad -->
+            <div class="glass-card p-4 mb-4">
+                <h3 class="text-white mb-4">
+                    <i class="fas fa-chess-board me-2"></i>
+                    Desempeño por Dificultad
+                </h3>
+                
+                <div class="row g-4">
+                    <!-- Básico -->
+                    <div class="col-md-4">
+                        <div class="difficulty-card basic-card text-center p-4">
+                            <div class="difficulty-icon mb-3">
+                                <i class="fas fa-chess-pawn display-4 text-primary"></i>
+                            </div>
+                            <h4 class="text-white">Básico</h4>
+                            <div class="stats-grid mt-3">
+                                <div class="stat-item">
+                                    <small class="text-muted">Partidas</small>
+                                    <h5 class="text-white">{{ basic_stats.total|default:0 }}</h5>
+                                </div>
+                                <div class="stat-item">
+                                    <small class="text-muted">Victorias</small>
+                                    <h5 class="text-success">{{ basic_stats.won|default:0 }}</h5>
+                                </div>
+                                <div class="stat-item">
+                                    <small class="text-muted">Win Rate</small>
+                                    <h5 class="text-warning">
+                                        {{ basic_win_rate|floatformat:1 }}%
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <small class="text-muted">Mejor Puntuación</small>
+                                <h4 class="text-warning">{{ basic_stats.best_score|default:0 }}</h4>
+                            </div>
+                            <div class="mt-2">
+                                <small class="text-muted">Promedio</small>
+                                <h5 class="text-info">{{ basic_stats.avg_score|default:0|floatformat:0 }}</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Medio -->
+                    <div class="col-md-4">
+                        <div class="difficulty-card medium-card text-center p-4">
+                            <div class="difficulty-icon mb-3">
+                                <i class="fas fa-chess-knight display-4 text-warning"></i>
+                            </div>
+                            <h4 class="text-white">Medio</h4>
+                            <div class="stats-grid mt-3">
+                                <div class="stat-item">
+                                    <small class="text-muted">Partidas</small>
+                                    <h5 class="text-white">{{ medium_stats.total|default:0 }}</h5>
+                                </div>
+                                <div class="stat-item">
+                                    <small class="text-muted">Victorias</small>
+                                    <h5 class="text-success">{{ medium_stats.won|default:0 }}</h5>
+                                </div>
+                                <div class="stat-item">
+                                    <small class="text-muted">Win Rate</small>
+                                    <h5 class="text-warning">
+                                        {{ medium_win_rate|floatformat:1 }}%
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <small class="text-muted">Mejor Puntuación</small>
+                                <h4 class="text-warning">{{ medium_stats.best_score|default:0 }}</h4>
+                            </div>
+                            <div class="mt-2">
+                                <small class="text-muted">Promedio</small>
+                                <h5 class="text-info">{{ medium_stats.avg_score|default:0|floatformat:0 }}</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Avanzado -->
+                    <div class="col-md-4">
+                        <div class="difficulty-card advanced-card text-center p-4">
+                            <div class="difficulty-icon mb-3">
+                                <i class="fas fa-chess-queen display-4 text-danger"></i>
+                            </div>
+                            <h4 class="text-white">Avanzado</h4>
+                            <div class="stats-grid mt-3">
+                                <div class="stat-item">
+                                    <small class="text-muted">Partidas</small>
+                                    <h5 class="text-white">{{ advanced_stats.total|default:0 }}</h5>
+                                </div>
+                                <div class="stat-item">
+                                    <small class="text-muted">Victorias</small>
+                                    <h5 class="text-success">{{ advanced_stats.won|default:0 }}</h5>
+                                </div>
+                                <div class="stat-item">
+                                    <small class="text-muted">Win Rate</small>
+                                    <h5 class="text-warning">
+                                        {{ advanced_win_rate|floatformat:1 }}%
+                                    </h5>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <small class="text-muted">Mejor Puntuación</small>
+                                <h4 class="text-warning">{{ advanced_stats.best_score|default:0 }}</h4>
+                            </div>
+                            <div class="mt-2">
+                                <small class="text-muted">Promedio</small>
+                                <h5 class="text-info">{{ advanced_stats.avg_score|default:0|floatformat:0 }}</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráficos y Progreso -->
+            <div class="row g-4">
+                <!-- Distribución de Partidas -->
+                <div class="col-md-6">
+                    <div class="glass-card p-4 h-100">
+                        <h4 class="text-white mb-4">
+                            <i class="fas fa-chart-pie me-2 text-info"></i>
+                            Distribución de Partidas
+                        </h4>
+                        
+                        <!-- Gráfico simple de victorias/derrotas -->
+                        <div class="text-center mb-4">
+                            <div class="win-loss-chart mx-auto" style="max-width: 200px;">
+                                <div class="chart-container position-relative">
+                                    <div class="chart-circle victory" 
+                                         style="--percentage: {{ profile.win_rate }}%;">
+                                        <span class="chart-text text-white fw-bold">
+                                            {{ profile.win_rate|floatformat:1 }}%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <span class="badge bg-success me-3">
+                                    <i class="fas fa-trophy me-1"></i>Victorias: {{ profile.games_won }}
+                                </span>
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-times me-1"></i>Derrotas: {{ profile.games_lost }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Preferencia de Dificultad -->
+                        <div class="mt-4">
+                            <h6 class="text-white mb-3">Preferencia de Dificultad</h6>
+                            {% with total=basic_stats.total|add:medium_stats.total|add:advanced_stats.total %}
+                            {% if total > 0 %}
+                            <div class="mb-2">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="text-white">
+                                        <i class="fas fa-chess-pawn text-primary me-2"></i>Básico
+                                    </span>
+                                    <span class="text-muted">
+                                        {{ basic_stats.total|default:0 }} ({% widthratio basic_stats.total total 100 %}%)
+                                    </span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-primary" style="width: {% widthratio basic_stats.total total 100 %}%"></div>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="text-white">
+                                        <i class="fas fa-chess-knight text-warning me-2"></i>Medio
+                                    </span>
+                                    <span class="text-muted">
+                                        {{ medium_stats.total|default:0 }} ({% widthratio medium_stats.total total 100 %}%)
+                                    </span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-warning" style="width: {% widthratio medium_stats.total total 100 %}%"></div>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="text-white">
+                                        <i class="fas fa-chess-queen text-danger me-2"></i>Avanzado
+                                    </span>
+                                    <span class="text-muted">
+                                        {{ advanced_stats.total|default:0 }} ({% widthratio advanced_stats.total total 100 %}%)
+                                    </span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar bg-danger" style="width: {% widthratio advanced_stats.total total 100 %}%"></div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <p class="text-muted text-center">Aún no hay partidas jugadas</p>
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rendimiento General -->
+                <div class="col-md-6">
+                    <div class="glass-card p-4 h-100">
+                        <h4 class="text-white mb-4">
+                            <i class="fas fa-tachometer-alt me-2 text-success"></i>
+                            Rendimiento General
+                        </h4>
+                        
+                        <div class="performance-stats">
+                            <div class="performance-item mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-white">Puntuación Promedio</span>
+                                    <span class="text-warning fw-bold">{{ profile.average_score|floatformat:0 }} pts</span>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-warning" style="width: {% widthratio profile.average_score 2000 100 %}%"></div>
+                                </div>
+                            </div>
+
+                            <div class="performance-item mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-white">Tiempo Promedio</span>
+                                    <span class="text-info fw-bold">{{ profile.average_time|floatformat:1 }}s</span>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-info" style="width: {% widthratio profile.average_time 90 100 %}%"></div>
+                                </div>
+                            </div>
+
+                            <div class="performance-item mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-white">Eficiencia</span>
+                                    <span class="text-success fw-bold">
+                                        {% if profile.total_games > 0 %}
+                                        {% widthratio profile.win_rate 100 100 %}%
+                                        {% else %}0%{% endif %}
+                                    </span>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-success" style="width: {{ profile.win_rate }}%"></div>
+                                </div>
+                            </div>
+
+                            <div class="performance-item">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-white">Consistencia</span>
+                                    <span class="text-purple fw-bold">{{ profile.win_rate|floatformat:1 }}%</span>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-purple" style="width: {{ profile.win_rate }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Logros -->
+                        <div class="mt-5">
+                            <h6 class="text-white mb-3">Tus Logros</h6>
+                            <div class="achievements-grid">
+                                {% if profile.best_score >= 1000 %}
+                                <div class="achievement-item text-center">
+                                    <i class="fas fa-crown text-warning display-6 mb-2"></i>
+                                    <small class="text-muted">Score Alto</small>
+                                </div>
+                                {% endif %}
+                                
+                                {% if profile.win_rate >= 50 %}
+                                <div class="achievement-item text-center">
+                                    <i class="fas fa-trophy text-success display-6 mb-2"></i>
+                                    <small class="text-muted">Win Rate 50%+</small>
+                                </div>
+                                {% endif %}
+                                
+                                {% if profile.total_games >= 10 %}
+                                <div class="achievement-item text-center">
+                                    <i class="fas fa-gamepad text-primary display-6 mb-2"></i>
+                                    <small class="text-muted">Jugador Activo</small>
+                                </div>
+                                {% endif %}
+                                
+                                {% if advanced_stats.total and advanced_stats.won %}
+                                <div class="achievement-item text-center">
+                                    <i class="fas fa-chess-queen text-danger display-6 mb-2"></i>
+                                    <small class="text-muted">Maestro Avanzado</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Partidas Recientes -->
+            <div class="glass-card p-4 mt-4">
+                <h4 class="text-white mb-4">
+                    <i class="fas fa-history me-2"></i>
+                    Partidas Recientes
+                </h4>
+                
+                {% if recent_games %}
+                <div class="table-responsive">
+                    <table class="table table-dark table-sm">
+                        <thead>
+                            <tr>
+                                <th>Resultado</th>
+                                <th>Dificultad</th>
+                                <th>Puntuación</th>
+                                <th>Tiempo</th>
+                                <th>Movimientos</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for game in recent_games %}
+                            <tr>
+                                <td>
+                                    {% if game.won %}
+                                    <span class="badge bg-success">Victoria</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Derrota</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge 
+                                        {% if game.difficulty == 'basic' %}bg-primary
+                                        {% elif game.difficulty == 'medium' %}bg-warning
+                                        {% else %}bg-danger{% endif %}">
+                                        {{ game.difficulty|title }}
+                                    </span>
+                                </td>
+                                <td class="fw-bold text-warning">{{ game.score }}</td>
+                                <td class="text-muted">{{ game.time_taken }}s</td>
+                                <td class="text-muted">{{ game.moves }}</td>
+                                <td class="text-muted">{{ game.start_time|date:"d/m H:i" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-3">
+                    <p class="text-muted">Aún no hay partidas recientes</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Botones de Navegación -->
+            <div class="text-center mt-4">
+                <a href="{% url 'profile' %}" class="btn btn-primary-custom me-2">
+                    <i class="fas fa-user me-2"></i>Mi Perfil
+                </a>
+                <a href="{% url 'game_history' %}" class="btn btn-info me-2">
+                    <i class="fas fa-history me-2"></i>Historial Completo
+                </a>
+                <a href="{% url 'leaderboard' %}" class="btn btn-warning me-2">
+                    <i class="fas fa-trophy me-2"></i>Ranking Global
+                </a>
+                <a href="{% url 'select_difficulty' %}" class="btn btn-success">
+                    <i class="fas fa-play me-2"></i>Nueva Partida
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.glass-card {
+    background: rgba(30, 30, 60, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 16px;
+}
+
+.stats-card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 15px;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: transform 0.2s;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+}
+
+.difficulty-card {
+    border-radius: 15px;
+    transition: transform 0.3s;
+    height: 100%;
+}
+
+.difficulty-card:hover {
+    transform: translateY(-5px);
+}
+
+.basic-card {
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.1), rgba(13, 110, 253, 0.2));
+    border: 1px solid rgba(13, 110, 253, 0.3);
+}
+
+.medium-card {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.2));
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.advanced-card {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.2));
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.stat-item {
+    background: rgba(255,255,255,0.05);
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.chart-container {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto;
+}
+
+.chart-circle {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(
+        #06d6a0 var(--percentage, 0%), 
+        #ef476f var(--percentage, 0%) 100%
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.chart-text {
+    font-size: 1.2rem;
+}
+
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 15px;
+}
+
+.achievement-item {
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-radius: 10px;
+    transition: transform 0.2s;
+}
+
+.achievement-item:hover {
+    transform: scale(1.05);
+}
+
+.bg-purple {
+    background-color: #8b5cf6 !important;
+}
+
+.progress {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+</style>
+{% endblock %}

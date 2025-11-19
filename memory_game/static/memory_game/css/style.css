@@ -1,0 +1,473 @@
+/* ===== VARIABLES Y CONFIGURACIÓN GLOBAL ===== */
+:root {
+    /* Colores principales */
+    --primary: #8b5cf6;
+    --primary-dark: #7c3aed;
+    --primary-light: #a78bfa;
+    --secondary: #06d6a0;
+    --accent: #ff6b6b;
+    --warning: #f59e0b;
+    
+    /* Colores de fondo */
+    --dark: #0f0f23;
+    --darker: #090913;
+    --card-bg: rgba(30, 30, 60, 0.7);
+    --navbar-bg: rgba(15, 15, 35, 0.9);
+    
+    /* Colores de texto */
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --text-light: #f8fafc;
+    
+    /* Bordes y efectos */
+    --border-color: rgba(139, 92, 246, 0.3);
+    --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    --blur: blur(20px);
+}
+
+/* ===== RESET Y CONFIGURACIÓN BASE ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 50%, #1e1b4b 100%);
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text);
+    position: relative;
+    overflow-x: hidden;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(6, 214, 160, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(255, 107, 107, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* ===== COMPONENTES REUTILIZABLES ===== */
+
+/* Glass Card - Para tarjetas con efecto vidrio */
+.glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: var(--blur);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+}
+
+/* Game Card - Específico para tarjetas de juego */
+.game-card {
+    background: var(--card-bg);
+    backdrop-filter: var(--blur);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.game-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+    transition: left 0.6s ease;
+}
+
+.game-card:hover::before {
+    left: 100%;
+}
+
+.game-card:hover {
+    transform: translateY(-10px);
+    border-color: var(--primary);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(139, 92, 246, 0.1),
+        0 0 30px rgba(139, 92, 246, 0.2);
+}
+
+/* Formularios */
+.form-control {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    color: var(--text);
+    padding: 12px 16px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    color: var(--text);
+}
+
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Botones */
+.btn-primary-custom {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
+}
+
+/* Botones de dificultad */
+.btn-difficulty {
+    border: none;
+    border-radius: 12px;
+    padding: 14px 28px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-difficulty::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-difficulty:hover::before {
+    left: 100%;
+}
+
+.btn-difficulty:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.btn-basic { 
+    background: linear-gradient(135deg, var(--secondary), #05a380);
+    color: white;
+}
+
+.btn-medium { 
+    background: linear-gradient(135deg, var(--warning), #d97706);
+    color: white;
+}
+
+.btn-advanced { 
+    background: linear-gradient(135deg, var(--accent), #e53e3e);
+    color: white;
+}
+
+/* Navbar */
+.navbar-custom {
+    background: var(--navbar-bg);
+    backdrop-filter: var(--blur);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 0;
+}
+
+/* Dropdown de usuario */
+.user-dropdown .dropdown-menu {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    backdrop-filter: var(--blur);
+}
+
+.user-dropdown .dropdown-item {
+    color: var(--text);
+    padding: 12px 20px;
+    transition: all 0.3s ease;
+}
+
+.user-dropdown .dropdown-item:hover {
+    background: rgba(139, 92, 246, 0.2);
+    color: var(--primary);
+}
+
+/* Utilidades */
+.difficulty-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(139, 92, 246, 0.2);
+    border: 1px solid var(--primary);
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.password-strength {
+    height: 6px;
+    border-radius: 3px;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+}
+
+.input-group-text {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-right: none;
+    color: rgba(255, 255, 255, 0.75);
+    padding: 14px 16px;
+}
+
+.form-control.border-start-0 {
+    border-left: none;
+}
+
+/* Animaciones */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+/* ===== COMPONENTES ESPECÍFICOS ===== */
+
+/* Logo de la marca */
+.brand-logo {
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 1rem;
+}
+
+/* Icono de juego principal */
+.game-icon {
+    font-size: 4rem;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 1rem;
+}
+
+/* Listas de características */
+.feature-list {
+    list-style: none;
+    padding: 0;
+}
+
+.feature-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.feature-list li:last-child {
+    border-bottom: none;
+}
+
+/* Tarjeta de estadísticas */
+.stats-card {
+    background: var(--card-bg);
+    backdrop-filter: var(--blur);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2rem;
+}
+
+/* Sección de bienvenida */
+.welcome-section {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+/* ===== ESTILOS ESPECÍFICOS DEL JUEGO MEMORY ===== */
+
+/* Tablero de Juego */
+.memory-board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Cartas del Juego */
+.memory-card {
+    aspect-ratio: 3/4;
+    perspective: 1000px;
+    cursor: pointer;
+}
+
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+}
+
+.memory-card.flipped .card-inner {
+    transform: rotateY(180deg);
+}
+
+.card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    border: 2px solid rgba(139, 92, 246, 0.3);
+}
+
+.card-front {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+}
+
+.card-back {
+    background: white;
+    color: #333;
+    transform: rotateY(180deg);
+}
+
+.memory-card.matched .card-back {
+    background: #06d6a0;
+    color: white;
+    border-color: #06d6a0;
+}
+
+/* Contenedor del Tablero */
+.game-board-container {
+    background: rgba(30, 30, 60, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 16px;
+    padding: 20px;
+}
+
+/* Efectos Hover en Cartas */
+.memory-card:not(.flipped):hover .card-front {
+    background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+    transform: scale(1.05);
+}
+
+/* Botón de Música */
+.music-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+/* Mensaje de Preview */
+.preview-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 20px 40px;
+    border-radius: 10px;
+    font-size: 1.5rem;
+    z-index: 100;
+    text-align: center;
+    animation: pulse 1s infinite;
+}
+
+/* Avatar de Usuario Grande */
+.user-avatar-large {
+    font-size: 4rem;
+    color: var(--primary);
+}
+
+/* Elementos de Historial de Juego */
+.game-history-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.game-history-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .memory-board {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        max-width: 100%;
+    }
+    
+    .card-front, .card-back {
+        font-size: 1.5rem;
+    }
+    
+    .game-board-container {
+        padding: 15px;
+    }
+    
+    .preview-message {
+        font-size: 1.2rem;
+        padding: 15px 25px;
+    }
+    
+    .music-btn {
+        bottom: 10px;
+        right: 10px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Animaciones adicionales */
+@keyframes cardMatch {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.memory-card.matched {
+    animation: cardMatch 0.5s ease-in-out;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}

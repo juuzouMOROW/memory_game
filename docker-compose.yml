@@ -1,18 +1,18 @@
-﻿services:
+services:
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: >
+      sh -c "python manage.py collectstatic --noinput &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
     ports:
-      - "8000:8000"
+      - "80:8000"
     environment:
       - DEBUG=1
-      - POSTGRES_DB=memory_game_db
-      - POSTGRES_USER=memory_user
-      - POSTGRES_PASSWORD=memory_password
-      - POSTGRES_HOST=db
-      - POSTGRES_PORT=5432
     depends_on:
       - db
 
@@ -24,8 +24,8 @@
       - POSTGRES_DB=memory_game_db
       - POSTGRES_USER=memory_user
       - POSTGRES_PASSWORD=memory_password
-    ports:
-      - "5432:5432"
 
 volumes:
   postgres_data:
+  static_volume:
+  media_volume:
